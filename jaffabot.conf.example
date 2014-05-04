@@ -1,0 +1,16 @@
+%Since no module should use an empty name, this is a comment.
+% Load ircv3c if you're connecting to IRC as a client.
+modproto%ircv3c.php
+mode%C
+%Runs as client
+% M% line ignored if using as client.
+% format: M%server.nick%login pass%realname%first_client_nick%identifier (ignored if not using TS6 or other NS-capable protocol)%client_user%client_host%client_dhost
+M%.%PaSsWoRd%Hi! :P%pRezor%00C
+% format: m%nick%realname%ident
+m%JaffaBot%Jaffabot 0.1RC1 yournick%jaffabot
+server%ssl://127.0.0.1:6697
+% Autojoin channels with key.
+% (If using server mode, syntax would be join%channel%unused%timestamp%modes, since this would generate a BURST/SJOIN/FJOIN/dafuqjoin:P)
+perform%MODE &*& +B-wi
+% Would be useful if you were on a NickServiced network. Not necessary when using P10, CHTS6 or Insp, since the bot will autologin
+loadmod%andromeda
