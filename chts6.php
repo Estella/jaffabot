@@ -30,6 +30,7 @@ class protocol{
 		regCallback($this,"irc_sjoin","SJOIN");
 		regCallback($this,"irc_part","PART");
 		regCallback($this,"irc_nick","NICK");
+		regCallback($this,"irc_logon","EUID");
 		regCallback($this,"irc_server","SID");
 		regCallback($this,"irc_ping","PING");
 		regCallback($this,"irc_ping","PING");

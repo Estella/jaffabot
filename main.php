@@ -8,7 +8,7 @@ function __autoload($c) {
 	require_once("./modules/".$c.".php");
 }
 
-//error_reporting(0);
+error_reporting(0);
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 
 function parseConf($linename,$rehash) {
