@@ -2,6 +2,7 @@
 
 global $privcalls;
 $privcalls = array();
+$privcalls[0] = array();
 global $debug;
 $debug = false; if ($debug) {
                    fwrite(STDOUT,"! !WARNING! ! You are running the IRCv3 Client protocol module in DEBUG mode. This means all input and output to the bot is logged to STDOUT.\r\n");
@@ -13,7 +14,7 @@ $debug = false; if ($debug) {
 function regPrivmsgCallback($object,$func,$client,$cmd){
 	global $privcalls;
 	// For client PRIVMSG callbacks all dests are the same
-	$privcalls[0][$cmd][] = array($object,$func);
+	$privcalls[0][strtolower($cmd)][] = array($object,$func);
 }
 
 class protocol{
@@ -99,9 +100,10 @@ class protocol{
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		// This parses PRIVMSGs. This should really be in the core... ugh
 		$cmd = explode(" ",$get["payload"],2);
-		foreach ($privcalls[0][$cmd[0]] as $callback) {
-			call_user_func($callback,$get["sendernick"],$get[($cmd["hassource"])?2:1],$cmd[1]);
+		foreach ($privcalls[0][strtolower($cmd[0])] as $callback) {
+			call_user_func($callback,$get["sendernick"],$get[1],$cmd[1]);
 		}
+		callEvents(array("cmd"=>"PRIVMSG","from"=>$get["sendernick"]));
 	}
 
 	function irc_ping($get){

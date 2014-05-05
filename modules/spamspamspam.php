@@ -2,7 +2,7 @@
 
 class spamspamspam {
 	function __construct($myname,$arr){
-		regPrivmsgCallback($this,"cmd_version","OS","!spam");
+		regPrivmsgCallback($this,"cmd_version",0,"!spam");
 	}
 	function cmd_version($who,$dest,$args) {
 		global $protofunc;
@@ -12,6 +12,6 @@ class spamspamspam {
 		$args = implode('\n',$args);
 		$args = explode("\r",$args);
 		$args = implode('\r',$args);
-		$protofunc->send_privmsg("OS",$to,"{$who}, I am a Jaffabot <https://github.com/asterIRC/jaffabot>");
+		$protofunc->send_privmsg(0,$to,"{$who}, I am a Jaffabot <https://github.com/asterIRC/jaffabot>");
 	}
 }
