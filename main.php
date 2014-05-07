@@ -12,6 +12,8 @@ function __autoload($c) {
 //error_reporting(0);
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 
+$mods["%args%"] = $argv;
+
 function isPrivate($dest) {
 	return (($dest[0] == "#") or ($dest[0] == "+"))?false:true;
 }
@@ -24,7 +26,7 @@ global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socke
 	// For .rehash requires to be done for every module
 	if ($linename == "") return false;
 	if (strcasecmp($rehash,"yes"))
-		$file = file_get_contents("./jaffabot.conf");
+		$file = file_get_contents("./".$mods["%args%"][1]);
 	$filelines = explode("\n",$file);
 	$lines = array();
 	foreach ($filelines as $line) {
@@ -37,7 +39,7 @@ global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socke
 
 function Rehash() {
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
-	$file = file_get_contents("./jaffabot.conf");
+	$file = file_get_contents("./".$mods["%args%"][1]);
 }
 
 function regCallback($object, $func, $protocolWord){
@@ -97,6 +99,7 @@ if ($opMode == "serv") {
 }
 
 require_once($protomod[0][1]);
+sleep(1);
 $protofunc = new protocol();
 $protofunc->protocol_start(array_slice($Mline[0],1)); // Protocols should follow the standard M:line setup
 foreach ($modules as $mod) {

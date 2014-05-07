@@ -87,7 +87,10 @@ class popup {
 		}
 		$font = explode("::",$ch[1],2);
 		if (!$protofunc->opmodes[$f][strtolower($ch[0])]) return; // Dafiq is the user doing trying to set up a show without status +qaohv? DAFIQ
-		$mystring = sprintf("/usr/bin/env toilet%s%s%s%s --irc -- %s",($font[0] == "none")?" ":" -F",($font[0] == "none")?"":escapeshellarg($font[0]),($font[1])?" -f":"",($font[1])?escapeshellarg($font[1]):"",escapeshellarg($ch[2]));
+		$mystring = sprintf("/usr/bin/env printf '%s' %s | /usr/bin/env figlet -k -w125 %s%s | /usr/bin/env toilet -w127 --irc -f term %s%s","%s",escapeshellarg($ch[2]),($font[1])?" -f":"",
+			($font[1])?escapeshellarg($font[1]):"",
+			($font[0] == "none")?" ":" -F",
+			($font[0] == "none")?"":escapeshellarg($font[0]));
 		$myshit = `$mystring`;
 		$helpfile = explode("\n",$myshit);
 		$protofunc->mode($this->cli,$ch[0]." +m");

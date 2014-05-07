@@ -4,7 +4,7 @@ global $privcalls;
 $privcalls = array();
 $privcalls[0] = array();
 global $debug;
-$debug = false; if ($debug) {
+$debug = true; if ($debug) {
                    fwrite(STDOUT,"! !WARNING! ! You are running the IRCv3 Client protocol module in DEBUG mode. This means all input and output to the bot is logged to STDOUT.\r\n");
                    fwrite(STDOUT,"! !WARNING! ! THIS INCLUDES BOT PASSWORDS! If you do not want to see the passwords people register with your bot with, please C-c\r\n");
                    fwrite(STDOUT,"! !WARNING! ! and edit ircv3c.php to change \$debug = true; to \$debug = false;.\r\n");

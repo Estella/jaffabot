@@ -21,6 +21,11 @@ class sv_help {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		switch (strtolower(trim($s))) {
 			case "":
+				$helpfile = explode("\n",file_get_contents("./helpmain.hlp"));
+				foreach ($helpfile as $helpline) {
+					$protofunc->send_notice($this->cli,$f,$helpline);
+				}
+				break;
 			case "login":
 				$helpfile = explode("\n",file_get_contents("./helplog.hlp"));
 				foreach ($helpfile as $helpline) {
