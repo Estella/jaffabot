@@ -1,0 +1,18 @@
+----====[ SV Help ]====----
+
+SV is a service to help you manage your nickname (or username if
+nickname ownership is disabled).
+
+ChanServ is a basic access management system that automodes someone
+on join if they have a defined account name as from acsadd.
+
+Currently, you can use these commands:
+PRIVMSG SV:
+       LOGIN:
+                Log in to your nickname/username.
+       REGISTER:
+                Register a username.
+
+PRIVMSG OperServ:
+       If you are an oper, you can use OPMODE:
+                Force a mode change on a channel.

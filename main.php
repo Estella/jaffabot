@@ -9,7 +9,7 @@ function __autoload($c) {
 	require_once("./modules/".$c.".php");
 }
 
-error_reporting(0);
+//error_reporting(0);
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 
 function isPrivate($dest) {
@@ -65,6 +65,9 @@ global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socke
 	 */
 	if ($callbacks[$get["cmd"]])
 		foreach ($callbacks[$get["cmd"]] as $callback) call_user_func($callback,array_slice($get,1));
+	if ($callbacks[$get["cmd"]]) return;
+	if ($callbacks[$get[0]])
+		foreach ($callbacks[$get[0]] as $callback) call_user_func($callback,array_slice($get,1));
 }
 
 function callEvents($get){
