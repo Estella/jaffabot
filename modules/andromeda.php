@@ -3,8 +3,8 @@
 class andromeda {
 	function __construct($myname,$arr){
 		regPrivmsgCallback($this,"cmd_version",0,"!version");
-		regPrivmsgCallback($this,"ctcp_version",0,"\x01VERSION\x01");
-		regPrivmsgCallback($this,"ctcp_version",0,"\x01VERSION");
+		regPrivmsgCallback($this,"ctcp_version",0,"\x01version\x01");
+		regPrivmsgCallback($this,"ctcp_version",0,"\x01version");
 	}
 	function cmd_version($who,$dest,$args) {
 		global $protofunc;
@@ -22,6 +22,6 @@ class andromeda {
 	}
 	function ctcp_version($who,$dest,$args) {
 		global $protofunc;
-		$protofunc->send_notice(0,$to,"\x01VERSION Jaffabot 0.1RC1 Jack D. Johnson\x01");
+		$protofunc->send_notice(0,$who,"\x01VERSION andromeda.php for Jaffabot 0.1RC1 Jack D. Johnson\x01");
 	}
 }

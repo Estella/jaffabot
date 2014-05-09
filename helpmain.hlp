@@ -17,12 +17,12 @@ PRIVMSG OperServ:
        If you are an oper, you can use OPMODE:
                 Force a mode change on a channel.
 
-PRIVMSG SV:
+PRIVMSG SVC:
        REGISTER:
                 Syntax: REGISTER <channel>
                 Register a channel
-		Syntax: REGISTER <channel> <username> <opflags>
-		Add an access list entry:
+                Syntax: REGISTER <channel> <username> <opflags>
+                Add an access list entry:
                     Opflags:
                         q       Grants automode +q on join.
                         a       Grants automode +a on join and access to 
