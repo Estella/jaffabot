@@ -21,6 +21,7 @@ class sv_register {
 			regPrivmsgCallback($this,"cmd_nslogin",$cli,"identify");
 		}
 		regEvent($this,"on_signon","SIGNON");
+		regEvent($this,"on_loc","ACCOUNT");
 		if ($this->nonickreg[0] == "y")
 			regEvent($this,"on_nickchg","NICK");
 	}
@@ -30,12 +31,22 @@ class sv_register {
 		$protofunc->sts_login($nick,$username,$username.".".$this->vhostsuff);
 	}
 
+	function on_loc($args) {
+		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
+		if ($args["action"] != "R") return;
+		$serv = $args["serv"];
+		$rqid = $args["rqid"];
+		if ($this->isRightPass($args["acct"],$args["pass"])) $protofunc->sts_authallow($serv,$rqid);
+		else $protofunc->sts_authdeny($serv,$rqid);
+	}
+
 	function on_signon($arr) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$nick = $arr["nick"];
+		$nick = $protofunc->nick[$arr["nick"]];
 		if ($this->isReg($nick) and (strtolower($protofunc->accnt[$nick]) == strtolower($nick))) return;
 		if ($this->nonickreg[0] == "y") {
 			if ($this->isReg($nick)) {
+				$nick = $arr["nick"];
 				$protofunc->send_notice($this->cli,$nick,"SV Nick Service *** Hi. This is your nickname service speaking.");
 				$protofunc->send_notice($this->cli,$nick,"                *** I've caught wind of allegations that the nick you're currently sitting on is");
 				$protofunc->send_notice($this->cli,$nick,"                *** owned by someone else. Please log in to the correct account.");
@@ -48,7 +59,7 @@ class sv_register {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		$checkeq = hash("sha512",hash("sha512",$pass));
 		$uobj = pg_fetch_object(pg_query($this->dbconn,"SELECT password FROM usernames WHERE lower(name) = '".pg_escape_string($this->dbconn,strtolower($username))."'"));
-		if ($checkeq = $uobj->password) return true;
+		if ($checkeq == $uobj->password) return true;
 		return false;
 	}
 
@@ -84,7 +95,7 @@ class sv_register {
 		}
 		$shit = explode(" ",$s);
 		$pass = ($this->nonickreg[0] != "y") ? $shit[1] : $shit[0];
-		$uname = ($this->nonickreg[0] != "y") ? $shit[0] : $f;
+		$uname = ($this->nonickreg[0] != "y") ? $shit[0] : $protofunc->nick[$f];
 		if ($this->isReg($uname)) {
 			$protofunc->send_notice($this->cli,$f,"What the fuck a duck? That ".($this->nonickreg[0] != "y")?"account":"nickname"." is already registered.");
 			return;
@@ -120,7 +131,7 @@ class sv_register {
 		$f = $from;
 		$shit = explode(" ",$msg);
 		$pass = ($this->nonickreg[0] != "y") ? $shit[1] : $shit[0];
-		$uname = ($this->nonickreg[0] != "y") ? $shit[0] : $from;
+		$uname = ($this->nonickreg[0] != "y") ? $shit[0] : $protofunc->nick[$f];
 		if (count($shit) == 2) $uname = $shit[0];
 		if (count($shit) == 2) $pass = $shit[1];
 		if ((($this->nonickreg[0] != "y") ? $shit[1] : $shit[0]) == "") {
@@ -136,7 +147,7 @@ class sv_register {
 			return;
 		}
 		if ($this->isRightPass($uname,$pass)) {
-			$protofunc->send_notice($this->cli,$f,"What the fuck a duck? Someone got their ".($this->nonickreg[0] != "y")?"account":"nickname"."'s password right for once! You are now logged in.");
+			$protofunc->send_notice($this->cli,$f,"What the fuck a duck? Someone got their account's password right for once! :D You are now logged in.");
 			$this->login_user($from,$uname);
 			return;
 		} else {

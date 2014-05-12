@@ -7,6 +7,8 @@ class chanserv_register {
 	function __construct($duud,$args) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		$cli = $args[0];
+		$this->goodmodes = str_split(parseConf("GM","no")[0][1]);
+		var_dump($this->goodmodes);
 		$this->cli = $args[0];
 		$this->dbconn = $mods["%sv_database%"] ;
 		regPrivmsgCallback($this,"cmd_register",$cli,"register");
@@ -17,13 +19,22 @@ class chanserv_register {
 
 	function do_up($args) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		var_dump($args);
-		$opGuy = $this->isOp($protofunc->accnt[$args["from"]],$args["chan"]);
+		if (!$this->isReg($args["chan"])) return;
+		$protofunc->CTS[strtolower($args["chan"])] = $this->chanTS($args["chan"]);
+		var_dump($protofunc->accnt);
+		$nopGuy = $this->isOp($protofunc->accnt[$args["from"]],$args["chan"]);
+		$opGuy="";
+		for ($i=0;$i<strlen($nopGuy);$i++) {
+			if (array_search($nopGuy[$i],$this->goodmodes)!==false) {
+				$opGuy .= $nopGuy[$i];
+			}
+		}
 		$modestring = $args["chan"];
-		$modestring .= " +";
+		$modestring .= " +z";
 		$modestring .= $opGuy;
 		$modestring .= " ";
 		$modestring .= str_repeat($args["from"]." ",strlen($opGuy));
+		$protofunc->sts_tsjoin($this->cli,$args["chan"],$this->chanTS($args["chan"]));
 		$protofunc->mode($this->cli,$modestring);
 	}
 
@@ -33,6 +44,13 @@ class chanserv_register {
 			.pg_escape_string($this->dbconn,strtolower($chan))."' and lower(nick) ='".pg_escape_string($this->dbconn,strtolower($username))."'"));
 		if ($uobj["flags"]) return $uobj["flags"];
 		return false;
+	}
+
+	function chanTS($chan) {
+		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
+		$uobj = pg_fetch_array(pg_query($this->dbconn,"SELECT ts FROM ts WHERE lower(channel) = '"
+			.pg_escape_string($this->dbconn,strtolower($chan))."'"));
+		return $uobj["ts"];
 	}
 
 	function isReg($username) {
@@ -47,6 +65,8 @@ class chanserv_register {
 		pg_query($this->dbconn,"INSERT INTO channels VALUES ('"
 			.pg_escape_string($this->dbconn,strtolower($chan))."','".pg_escape_string($this->dbconn,strtolower($username))."','"
 			.pg_escape_string($this->dbconn,strtolower($flags))."')");
+		pg_query($this->dbconn,"INSERT INTO ts VALUES ('"
+			.pg_escape_string($this->dbconn,strtolower($chan))."','".pg_escape_string($this->dbconn,strtolower($protofunc->CTS[$chan]))."')");
 	}
 
 	function cmd_register($f,$d,$s) {

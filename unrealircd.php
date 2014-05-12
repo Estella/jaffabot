@@ -87,8 +87,8 @@ class protocol {
 	function irc_metadata($args) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 
-		switch ($args[2]) {
-			case "accountname":
+		switch (TRUE) {
+			case (strpos($args[2],"d") === TRUE):
 				if ($args["payload"] == "") {
 					callEvents(array("cmd"=>"ACCOUNT","nick"=>$args[1],"action"=>"O"));
 					break;
@@ -99,7 +99,7 @@ class protocol {
 				$this->accnt[$args[1]] = $args["payload"];
 				callEvents(array("cmd"=>"ACCOUNT","nick"=>$args[1],"action"=>"I","acct"=>$args["payload"]));
 				break;
-			case "cloakhost":
+			case ($args[0]):
 				// This happens for anyone connecting or changing mode to +x
 				$this->vhost[$args[1]] = $args["payload"];
 				callEvents(array("cmd"=>"FAKEHOST","nick"=>$args[1],"hostname"=>$args["payload"]));
@@ -157,7 +157,7 @@ class protocol {
 
 	function sts_join($client,$channel) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$this->sw(sprintf(":%s SJOIN %s %s %s :*@%s",$confItems["SID"],$this->TS,$channel));
+		$this->sw(sprintf(":%s SJOIN %s %s %s :*@%s",$confItems["SID"],$this->TS[$channel],$channel,$this->chanmodes[$channel]));
 	}
 
 	function sts_part($client,$channel, $reason) {
@@ -224,7 +224,7 @@ class protocol {
 
 	function irc_ping($get){
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$this->sw(sprintf(":%s PONG :%s",$confItems["SID"],$get["payload"]));
+		$this->sw(sprintf("PONG %s :%s",$confItems["SID"],$get["payload"]));
 	}
 
 	function send_msg($type,$from,$to,$message) {
@@ -240,33 +240,34 @@ class protocol {
 		$args[2] = strtolower($args[1]);
 		$chans = explode(",",$args[1]);
 		foreach ($chans as $chandef) {
-			$chandef = explode("\x07",$chandef);
-			$chan = $chandef[0];
-			$ops = $chandef[1];
+			$chan = $chandef;
 			$this->inChans[$args["sendernick"]][$chan] = true;
-			$this->opmodes[$args["sendernick"]][$chan] = $ops;
 			callEvents(array("cmd"=>"JOIN","from"=>$args["sendernick"],"chan"=>$chan));
 		}
 	}
 
 	function irc_njoin($args) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$sjnicks = explode(",",$args["payload"]);
+		$sjnicks = explode(" ",$args["payload"]);
 		$get = $args;
-		$get[1] = strtolower($get[1]);
-		$args[1] = strtolower($get[1]);
+		$get[1] = strtolower($get[2]);
+		$args[1] = strtolower($get[2]);
+		$this->TS[$get[2]] = $get[1];
 		foreach ($sjnicks as $nick) {
+			if ($nick[0] == "&") break;
+			if ($nick[0] == '"') break;
+			if ($nick[0] == "'") break;
 			for ($i=0;$i<strlen($nick);$i++) {
-				echo "NJOIN ".$nick."=".$i."\n";
-				if ((($nick[$i] == "~") or ($nick[$i] == "&")
+				if ((($nick[$i] == "~") or ($nick[$i] == "*")
 					or ($nick[$i] == "@") or ($nick[$i] == "%") or ($nick[$i] == "+"))) continue;
 				$nickpos = $i; break;
 			}
-			$modestring = strtr(substr($nick,0,$nickpos),"~&@%+","qaohv");
-			echo "NMODE ".$nick."+".$modestring."\n";
-			$this->inChans[substr($nick,$nickpos)][$get[1]] = true;
-			if ($modestring) $this->opmodes[substr($nick,$nickpos)][strtolower($get[1])] = $modestring;
-			if ($modestring) $this->opped[strtolower($get[1])][substr($nick,$nickpos)] = $modestring;
+			echo "NJOIN ".$get[2]." @TS".$get[1]." ".$nick."\n";
+			$modestring = strtr(substr($nick,0,$nickpos),"~*@%+","qaohv");
+			echo "MODE ".$get[2]." ".$nick." +".$modestring."\n";
+			$this->inChans[substr($nick,$nickpos)][$get[2]] = true;
+			if ($modestring) $this->opmodes[substr($nick,$nickpos)][strtolower($get[2])] = $modestring;
+			if ($modestring) $this->opped[strtolower($get[2])][substr($nick,$nickpos)] = $modestring;
 		}
 	}
 

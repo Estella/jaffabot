@@ -110,11 +110,13 @@ class protocol {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 
 		if (count($args) > 5) { /* Got the right number of arguments for a user introduction? */
+			$this->nick[$args[1]] = $args[1];
 			$this->ident[$args[1]] = $args[4];
 			$this->rhost[$args[1]] = $args[5];
 			$this->gecos[$args[1]] = $args["payload"];
 			callEvents(array("cmd"=>"SIGNON","ident"=>$args[4],"realhost"=>$args[5],"nick"=>$args[1]));
 		} else { /* This guy is changing his nickname; update the arrays. */
+			$this->nick[$args[1]] = $args[1];
 			$args[1] = $args["payload"];
 			$this->ident[$args[1]] = $this->ident[$args["sendernick"]];
 			unset($this->ident[$args["sendernick"]]);
