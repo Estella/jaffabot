@@ -160,12 +160,14 @@ class SockSelect {
 		$opt = array("ssl" => array("local_cert" => $pem, "capture_peer_cert" => TRUE));
 		$opts = stream_context_create($opt);
 		$fd = stream_socket_server("ssl://".$listen,$err,$errs,STREAM_SERVER_BIND|STREAM_SERVER_LISTEN,$opts);
+		$this->listeners[]=$fd;
 		return $fd;
 	}
 	
 	function listen ($listen) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 		$fd = stream_socket_server("tcp://".$listen);
+		$this->listeners[]=$fd;
 		return $fd;
 	}
 }

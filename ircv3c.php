@@ -58,7 +58,7 @@ class protocol{
 
 	function sw($mesg) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		fwrite($socket,$mesg."\r\n");
+		$mods["%select%"]->write($socket,$mesg."\r\n");
 		if ($debug) fwrite(STDOUT,"Output ".$mesg."\n");
 	}
 
