@@ -1,0 +1,17 @@
+TODO for Jaffabot
+
+[ ] Make the $socket into just the main socket.
+[ ] Modernize
+    [ ] Support multiple sockets per bot
+        [ ] Support partylines
+        [ ] Support multiple networks
+        [ ] Support ident connections and other interesting features
+        [ ] Support out of band IDENTIFY
+            > IDENTIFYCOOKIE <nick>
+            < COOKIE <nick> <cookie> SHA512
+            < COOKIEAUTH Please reply on Telnet <host> <port> with the correct auth code.
+            [user telnets to bot auth port]
+            $auth = hash("sha512", $cookie."<password>")
+            ( COOKIEAUTH <cookie> $auth
+            ) COOKIEAUTH <nick> You are now authenticated for commands; see !help on IRC
+            < COOKIEAUTH You are now authenticated for commands with the cookie I gave.

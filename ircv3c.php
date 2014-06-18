@@ -27,12 +27,12 @@ class protocol{
 		regCallback($this,"protocol_privmsg","PRIVMSG");
 		regCallback($this,"ignore","372");
 		regCallback($this,"ignore","376");
-		regCallback($this,"ignore","353");
+		regCallback($this,"irc_namreply","353");
 		regCallback($this,"ignore","366");
 		regCallback($this,"irc_join","JOIN");
 		regCallback($this,"irc_part","PART");
 		regCallback($this,"irc_ping","PING");
-		regCallback($this,"irc_WeReConnected","001");
+		regCallback($this,"irc_WeReConnected","251");
 		regCallback($this,"ignore","005");
 		regCallback($this,"irc3_cap","CAP");
 		$this->sw("CAP REQ :multi-prefix extended-join account-notify away-notify");

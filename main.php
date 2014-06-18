@@ -9,7 +9,9 @@ function __autoload($c) {
 	require_once("./modules/".$c.".php");
 }
 
-error_reporting(0);
+include_once("./core.php");
+
+//error_reporting(0);
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 
 $mods["%args%"] = $argv;
@@ -85,12 +87,12 @@ global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socke
 }
 
 Rehash();
+$mods["%select%"] = new SockSelect();
 $modeline = parseConf("mode","no");
 $opMode = "client";
 $protomod = parseConf("modproto","no");
 $connect = parseConf("server","no");
 $modules = parseConf("loadmod","no");
-$socket = fsockopen($connect[0][1]);
 if ($modeline[0][1] == "S") $opMode = "serv";
 if ($opMode == "serv") {
 	$Mline = parseConf("M","no");
@@ -101,7 +103,22 @@ if ($opMode == "serv") {
 require_once($protomod[0][1]);
 sleep(1);
 $protofunc = new protocol();
+
+$socket = $mods["%select%"]->connect($connect[0][1],array(
+	"ssl" => array(
+		"verify_peer" => false,
+		"verify_peer_name" => false
+	)
+),"callSock");
+
 $protofunc->protocol_start(array_slice($Mline[0],1)); // Protocols should follow the standard M:line setup
+
+function callSock($fd,$get) {
+	global $protofunc;
+        $got = $protofunc->parse(trim($get));
+        callCallbacks($got); 
+}
+
 foreach ($modules as $mod) {
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 	// Modules take their options as an array.
@@ -110,10 +127,20 @@ global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socke
 	if ($mod[1] == "/") break;
 	$mods[$mod[1]] = new $mod[1]($mod[1],array_slice($mod,2));
 }
+
+/*
+ * We've decided that protocol modules will have to register a callback
+ * for the main socket; however, the core will do that for them.
+ * So they don't need to. -- j4jackj
+ */
+
+//$callbacks["%input%"][(int)$socket] = callCallbacks($got);
+
 while (true) {
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
-	if (feof($socket)) die("Error  Socket fucked a duck");
+	/* if (feof($socket)) die("Error  Socket fucked a duck");
 	$get = fgets($socket,514);
 	$got = $protofunc->parse(trim($get));
-	callCallbacks($got);
+	callCallbacks($got); */
+	$mods["%select%"]->loop();
 }
