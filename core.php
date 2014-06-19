@@ -83,6 +83,7 @@ class SockSelect {
 		$r = $w = $e = $GLOBALS["mods"]["%socket%"];
 		@stream_select($r, $w, $e, 0, 2000);
 		foreach ($r as $fi) call_user_func(array($this,"do_read"),$fi);
+		foreach ($r as $fi) call_user_func(array($this,"do_write"),$fi);
 		foreach ($w as $fi) call_user_func(array($this,"do_write"),$fi);
 		foreach ($e as $fi) {
 			unset($GLOBALS["mods"]["%socket%"][(int)$fi],$callbacks["%readable%"][(int)$fi],$callbacks["%writable%"][(int)$fi]);
@@ -133,7 +134,7 @@ class SockSelect {
 	
 	function do_read($fd) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
-		$data = trim(fgets($fd,20000),"\r\n");
+		$data = trim(fgets($fd),"\r\n");
 		if (feof($fd)) {	foreach ($callbacks["%exit%"] as $cb) call_user_func($cb,$fd);
 			unset($GLOBALS["mods"]["%socket%"][array_search($fd,$GLOBALS["mods"]["%socket%"])],$callbacks["%readable%"][(int)$fd],$callbacks["%writable%"][(int)$fd]);
 			return;
@@ -152,7 +153,7 @@ class SockSelect {
 	
 	function write($fd,$data) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
-		$GLOBALS["mods"]["%writebuf%"][(int)$fd] .= $data."\n";
+		$GLOBALS["mods"]["%writebuf%"][(int)$fd] .= $data;
 	}
 	
 	function listen_ssl ($listen, $pem) {

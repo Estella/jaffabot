@@ -102,7 +102,9 @@ if ($opMode == "serv") {
 
 require_once($protomod[0][1]);
 sleep(1);
-$protofunc = new protocol();
+$prot = str_replace(".php","",$protomod[0][1]);
+// Protocol modules are now floating, i.e. a module can load a protocol module
+// that is different to the main one (altho how $socket will work i don't know)
 
 $socket = $mods["%select%"]->connect($connect[0][1],array(
 	"ssl" => array(
@@ -110,6 +112,8 @@ $socket = $mods["%select%"]->connect($connect[0][1],array(
 		"verify_peer_name" => false
 	)
 ),"callSock");
+
+$protofunc = new $prot($socket);
 
 $protofunc->protocol_start(array_slice($Mline[0],1)); // Protocols should follow the standard M:line setup
 

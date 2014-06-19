@@ -16,7 +16,10 @@ function regPrivmsgCallback($object,$func,$client,$cmd){
 	$privcalls[$client][$cmd][] = array($object,$func);
 }
 
-class protocol {
+class p10 {
+	function __construct($sock) {
+		$this->socket = $sock;
+	}
 	function ignore(){
 		return;
 	}
@@ -43,7 +46,7 @@ class protocol {
 
 	function sw($mesg) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$mods["%select%"]->write($socket,$mesg."\r\n");
+		$mods["%select%"]->write($this->socket,$mesg."\r\n");
 		if ($debug) fwrite(STDOUT,"Output ".$mesg."\n");
 	}
 
@@ -56,7 +59,7 @@ class protocol {
 
 	function kill($client,$mesg) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		fwrite($socket,$confItems["SID"].$this->cliNick[$client]." D ".$mesg."\r\n");
+		fwrite($this->socket,$confItems["SID"].$this->cliNick[$client]." D ".$mesg."\r\n");
 	}
 
 	function irc_capab($get) {

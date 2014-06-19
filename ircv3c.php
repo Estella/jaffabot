@@ -4,7 +4,7 @@ global $privcalls;
 $privcalls = array();
 $privcalls[0] = array();
 global $debug;
-$debug = true; if ($debug) {
+$debug = false; if ($debug) {
                    fwrite(STDOUT,"! !WARNING! ! You are running the IRCv3 Client protocol module in DEBUG mode. This means all input and output to the bot is logged to STDOUT.\r\n");
                    fwrite(STDOUT,"! !WARNING! ! THIS INCLUDES BOT PASSWORDS! If you do not want to see the passwords people register with your bot with, please C-c\r\n");
                    fwrite(STDOUT,"! !WARNING! ! and edit ircv3c.php to change \$debug = true; to \$debug = false;.\r\n");
@@ -17,7 +17,10 @@ function regPrivmsgCallback($object,$func,$client,$cmd){
 	$privcalls[0][strtolower($cmd)][] = array($object,$func);
 }
 
-class protocol{
+class ircv3c{
+	function __construct($sock) {
+		$this->socket = $sock;
+	}
 	function ignore(){
 		return;
 	}
@@ -36,9 +39,9 @@ class protocol{
 		regCallback($this,"ignore","005");
 		regCallback($this,"irc3_cap","CAP");
 		$this->sw("CAP REQ :multi-prefix extended-join account-notify away-notify");
-		$this->sw("CAP END");
 		$this->sw(sprintf("NICK %s",$args[0]));
 		$this->sw(sprintf("USER %s * * :%s",($args[2])?$args[2]:"jaffabot",$args[1]));
+		$this->sw("CAP END");
 	}
 	function irc_WeReConnected($args){
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
@@ -58,7 +61,7 @@ class protocol{
 
 	function sw($mesg) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$mods["%select%"]->write($socket,$mesg."\r\n");
+		$mods["%select%"]->write($this->socket,$mesg."\r\n");
 		if ($debug) fwrite(STDOUT,"Output ".$mesg."\n");
 	}
 

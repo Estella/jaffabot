@@ -22,6 +22,6 @@ class andromeda {
 	}
 	function ctcp_version($who,$dest,$args) {
 		global $protofunc;
-		$protofunc->send_notice(0,$who,"\x01VERSION andromeda.php for Jaffabot 0.1RC1 Jack D. Johnson\x01");
+		$protofunc->send_notice(0,$who,"\x01VERSION andromeda.php for Jaffabot 0.99.7 Vancouver by Jack D. Johnson\x01");
 	}
 }
