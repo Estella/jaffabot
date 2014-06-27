@@ -4,7 +4,7 @@ global $privcalls;
 $privcalls = array();
 $privcalls[0] = array();
 global $debug;
-$debug = false; if ($debug) {
+$debug = true; if ($debug) {
                    fwrite(STDOUT,"! !WARNING! ! You are running the IRCv3 Client protocol module in DEBUG mode. This means all input and output to the bot is logged to STDOUT.\r\n");
                    fwrite(STDOUT,"! !WARNING! ! THIS INCLUDES BOT PASSWORDS! If you do not want to see the passwords people register with your bot with, please C-c\r\n");
                    fwrite(STDOUT,"! !WARNING! ! and edit ircv3c.php to change \$debug = true; to \$debug = false;.\r\n");
@@ -40,6 +40,7 @@ class ircv3c{
 		regCallback($this,"irc3_cap","CAP");
 		$this->sw("CAP REQ :multi-prefix extended-join account-notify away-notify");
 		$this->sw(sprintf("NICK %s",$args[0]));
+		$this->ournick = $args[0];
 		$this->sw(sprintf("USER %s * * :%s",($args[2])?$args[2]:"jaffabot",$args[1]));
 		$this->sw("CAP END");
 	}
@@ -50,7 +51,7 @@ class ircv3c{
 		$performs = parseConf("perform","no");
 		foreach ($performs as $performline) {
 			$perform = implode("%",array_slice($performline,1));
-			$perform = implode($nick,explode("&*&",$perform));
+			$perform = implode($this->ournick,explode("&*&",$perform));
 			$this->sw($perform);
 		}
 		$joins = parseConf("join","no");
@@ -61,7 +62,7 @@ class ircv3c{
 
 	function sw($mesg) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$mods["%select%"]->write($this->socket,$mesg."\r\n");
+		fwrite($this->socket,$mesg."\r\n");
 		if ($debug) fwrite(STDOUT,"Output ".$mesg."\n");
 	}
 
@@ -99,6 +100,16 @@ class ircv3c{
 		return $cmd;
 	}
 
+	function sts_join($client,$channel,$key) {
+		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
+		$this->sw(sprintf("JOIN %s %s",$channel,$key));
+	}
+
+	function sts_leave($client,$channel,$rzn) {
+		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
+		$this->sw(sprintf("PART %s :%s",$channel,$rzn));
+	}
+
 	function protocol_privmsg($get){
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		// This parses PRIVMSGs. This should really be in the core... ugh
@@ -106,12 +117,13 @@ class ircv3c{
 		foreach ($privcalls[0][strtolower($cmd[0])] as $callback) {
 			call_user_func($callback,$get["sendernick"],$get[1],$cmd[1]);
 		}
-		callEvents(array("cmd"=>"PRIVMSG","from"=>$get["sendernick"]));
+		callEvents(array("cmd"=>"PRIVMSG","message"=>$get["payload"],"from"=>$get["sendernick"]));
 	}
 
 	function irc_ping($get){
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$this->sw(sprintf("PONG :%s",$get["payload"]));
+		$this->sw(sprintf("PONG %s :%s",$this->ournick,$get["payload"]));
+		$this->sw(sprintf("PING %s",$get["payload"]));
 	}
 
 	function send_msg($type,$from,$to,$message) {

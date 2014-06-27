@@ -10,9 +10,7 @@ class sv_register {
 		$this->cli = $args[0];
 		$this->nonickreg = parseConf("sv_ns","no")[0][1];
 		$this->vhostsuff = parseConf("sv_ns","no")[0][2];
-		$svdb = parseConf("sv_db","no");
-		$mods["%sv_database%"] = pg_connect($svdb[0][1]);
-		$this->dbconn = $mods["%sv_database%"] ;
+		$this->alert = parseConf("sv_alert","no")[0][1];
 		regPrivmsgCallback($this,"cmd_register",$cli,"register");
 		regPrivmsgCallback($this,"cmd_drop",$cli,"drop");
 		regPrivmsgCallback($this,"cmd_login",$cli,"login");
@@ -29,11 +27,16 @@ class sv_register {
 	function login_user ($nick,$username) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		$protofunc->sts_login($nick,$username,$username.".".$this->vhostsuff);
+		$protofunc->send_notice($this->cli,$this->alert,"AC ".$protofunc->nicks[nick]."!".$protofunc->ident[$nick]."@".$username.".".$this->vhostsuff." ".$username ); // $this->alert = parseConf("sv_alert","no")[0][1];
 	}
 
 	function on_loc($args) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		if ($args["action"] != "R") return;
+		if ($args["action"] != "R") {
+			$protofunc->send_notice($this->cli,$this->alert, "AC" . $protofunc->nicks[$args["nick"]] . $args["acct"] );
+			return;
+		}
+
 		$serv = $args["serv"];
 		$rqid = $args["rqid"];
 		if ($this->isRightPass($args["acct"],$args["pass"])) $protofunc->sts_authallow($serv,$rqid);
@@ -58,21 +61,20 @@ class sv_register {
 	function isRightPass($username,$pass) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		$checkeq = hash("sha512",hash("sha512",$pass));
-		$uobj = pg_fetch_object(pg_query($this->dbconn,"SELECT password FROM usernames WHERE lower(name) = '".pg_escape_string($this->dbconn,strtolower($username))."'"));
-		if ($checkeq == $uobj->password) return true;
+		if ($checkeq == $mods["userlist"]->db["sv"]["nicks"][$username]["pass"]) return true;
 		return false;
 	}
 
 	function register_nick($username,$pass) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
 		$checkeq = hash("sha512",hash("sha512",$pass));
-		pg_query($this->dbconn,"INSERT INTO usernames VALUES ('".pg_escape_string($this->dbconn,strtolower($username))."','".pg_escape_string($this->dbconn,$checkeq)."')");
+		$mods["userlist"]->db["sv"]["nicks"][$username] = array();
+		$mods["userlist"]->db["sv"]["nicks"][$username]["pass"] = $checkeq;
 	}
 
 	function isReg($nick) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$uobj = pg_fetch_object(pg_query($this->dbconn,"SELECT name FROM usernames WHERE lower(name) = '".pg_escape_string($this->dbconn,strtolower($nick))."'"));
-		if ($uobj->name == strtolower($nick)) return true;
+		if ($mods["userlist"]->db["sv"]["nicks"][$username]) return true;
 		return false;
 	}
 
@@ -87,10 +89,6 @@ class sv_register {
 		if (!(isPrivate($d))) return;
 		if ($protofunc->accnt[$f] != "") {
 			$protofunc->send_notice($this->cli,$f,"Command error: You are already logged into SV.");
-			return;
-		}
-		if (!($this->dbconn)) {
-			$protofunc->send_notice($this->cli,$f,"Command error: SV cannot access the DataBase at this time; ask your netadmin to restart Jaffabot.");
 			return;
 		}
 		$shit = explode(" ",$s);
@@ -122,10 +120,6 @@ class sv_register {
 		if (!(isPrivate($dest))) return;
 		if ($protofunc->accnt[$from] != "") {
 			$protofunc->send_notice($this->cli,$from,"Command error: You are already logged into SV.");
-			return;
-		}
-		if (!($this->dbconn)) {
-			$protofunc->send_notice($this->cli,$from,"Command error: SV cannot access the DataBase at this time; ask your netadmin to restart Jaffabot.");
 			return;
 		}
 		$f = $from;

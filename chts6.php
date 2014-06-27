@@ -107,7 +107,7 @@ class protocol{
 
 	function irc_join($args) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$this->inChans[$cmd["sendernick"]][$args[2]] = true;
+		$this->inChans[$args["sendernick"]][$args[2]] = true;
 	}
 
 	function irc_sjoin($args) {

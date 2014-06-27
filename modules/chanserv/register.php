@@ -30,7 +30,7 @@ class chanserv_register {
 			}
 		}
 		$modestring = $args["chan"];
-		$modestring .= " +z";
+		$modestring .= " +";
 		$modestring .= $opGuy;
 		$modestring .= " ";
 		$modestring .= str_repeat($args["from"]." ",strlen($opGuy));
@@ -40,17 +40,18 @@ class chanserv_register {
 
 	function isOp($username,$chan) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$uobj = pg_fetch_array(pg_query($this->dbconn,"SELECT flags FROM channels WHERE lower(name) = '"
-			.pg_escape_string($this->dbconn,strtolower($chan))."' and lower(nick) ='".pg_escape_string($this->dbconn,strtolower($username))."'"));
-		if ($uobj["flags"]) return $uobj["flags"];
-		return false;
+		return $mods["userlist"]->db["flags"][$chan][$username];
+//		$uobj = pg_fetch_array(pg_query($this->dbconn,"SELECT flags FROM channels WHERE lower(name) = '"
+///			.pg_escape_string($this->dbconn,strtolower($chan))."' and lower(nick) ='".pg_escape_string($this->dbconn,strtolower($username))."'"));
+///		if ($uobj["flags"]) return $uobj["flags"];
+///		return false;
 	}
 
 	function chanTS($chan) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket, $privcalls, $debug;
-		$uobj = pg_fetch_array(pg_query($this->dbconn,"SELECT ts FROM ts WHERE lower(channel) = '"
-			.pg_escape_string($this->dbconn,strtolower($chan))."'"));
-		return $uobj["ts"];
+//		$uobj = pg_fetch_array(pg_query($this->dbconn,"SELECT ts FROM ts WHERE lower(channel) = '"
+//			.pg_escape_string($this->dbconn,strtolower($chan))."'"));
+		return $mods["userlist"]->db["cts"][$chan];
 	}
 
 	function isReg($username) {

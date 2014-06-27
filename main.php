@@ -11,7 +11,7 @@ function __autoload($c) {
 
 include_once("./core.php");
 
-//error_reporting(0);
+error_reporting(0);
 global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 
 $mods["%args%"] = $argv;

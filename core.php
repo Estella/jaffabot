@@ -70,8 +70,8 @@ class SockSelect {
 		*/
 		$GLOBALS["mods"]["%socket%"] = array();
 		$GLOBALS["callbacks"]["%input%"] = array();
-		foreach (parseConf("Pssl",false) as $s) $this->listeners[] = $this->listen_ssl($s[1],$s[2]);
-		foreach (parseConf("P",false) as $s) $this->listeners[] = $this->listen($s[1]);
+		foreach (parseConf("Pssl",false) as $s) $this->listen_ssl($s[1],$s[2]);
+		foreach (parseConf("P",false) as $s) $this->listen($s[1]);
 		return;
 	}
 	
@@ -109,6 +109,7 @@ class SockSelect {
 		$fi = stream_socket_accept($fd);
 		$GLOBALS["mods"]["%writebuf%"][(int)$fi] = "";
 		foreach ($callbacks["%new%"] as $cb) call_user_func($cb,$fi);
+		foreach ($callbacks["%socknew%"][(int)$fd] as $cb) call_user_func($cb,$fi);
 		$GLOBALS["mods"]["%socket%"][] = $fi;
 		$callbacks["%readable%"][(int)$fi] = array($this,"do_read");
 		$callbacks["%writable%"][(int)$fi] = array($this,"do_write");
@@ -156,19 +157,21 @@ class SockSelect {
 		$GLOBALS["mods"]["%writebuf%"][(int)$fd] .= $data;
 	}
 	
-	function listen_ssl ($listen, $pem) {
+	function listen_ssl ($listen, $pem, $cb = NULL) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 		$opt = array("ssl" => array("local_cert" => $pem, "capture_peer_cert" => TRUE));
 		$opts = stream_context_create($opt);
 		$fd = stream_socket_server("ssl://".$listen,$err,$errs,STREAM_SERVER_BIND|STREAM_SERVER_LISTEN,$opts);
 		$this->listeners[]=$fd;
+		if ($cb) $callbacks["%socknew%"][(int)$fd]=$cb;
 		return $fd;
 	}
 	
-	function listen ($listen) {
+	function listen ($listen, $cb = NULL) {
 		global $confItems, $file, $opMode, $Mline, $protofunc, $mods, $callbacks, $socket;
 		$fd = stream_socket_server("tcp://".$listen);
 		$this->listeners[]=$fd;
+		if ($cb) $callbacks["%socknew%"][(int)$fd]=$cb;
 		return $fd;
 	}
 }

@@ -1,0 +1,22 @@
+Certain ideas for Jaffabot's modules came from Andromeda on LegendaryIRC.
+
+15:19 < Andromeda> rm -rf #Lounge/*
+15:20 < Andromeda> btw
+15:20 < Andromeda> plans for the next drone
+15:20 < Andromeda> linux style commands
+15:20 < Andromeda> rm -rf = chankick
+15:20 < KillerChihuahua> Lol.
+15:20 < j4jackj> XD
+15:20 < Andromeda> mv -f = svsjoin/svspart
+15:20 < j4jackj> i wanna make that :P
+15:20 < KillerChihuahua> We could do that as binds on x4. :P
+15:20 < Andromeda> ls = list all users
+15:20  * j4jackj symlinks Andromeda's anus to his left foot
+15:21 < Andromeda> ln -s j4jackj craigory
+15:21 < j4jackj> you just gave me an idea XD
+15:21 < j4jackj> ln -s #channel #channel2 will = mass svsjoin
+15:21 < j4jackj> first off tho, i need to patch svsjoin into ircd-chatd
+15:22 < KillerChihuahua> Don't steal his ideas without credits to CerberusLabs. :P
+15:22 < j4jackj> I will probably add credits
+15:22 < Andromeda> KillerChihuahua: hmmmm
+
